@@ -1,0 +1,103 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+struct Employee {
+    int id;
+    string name;
+    float BS;  // Basic Salary
+    float TA;  // Transport Allowance
+    float IT;  // Income Tax
+    float NS;  // Net Salary
+};
+
+// Function to calculate IT and NS
+void calculate(Employee &emp) {
+    if (emp.TA > 0) {
+        if (emp.BS > 15000)
+            emp.IT = (emp.BS + emp.TA) * 0.35;
+        else if (emp.BS > 10000)
+            emp.IT = (emp.BS + emp.TA) * 0.3;
+        else if (emp.BS > 5000)
+            emp.IT = (emp.BS + emp.TA) * 0.2;
+        else
+            emp.IT = 0;
+    } else {
+        emp.IT = 0;
+    }
+    emp.NS = (emp.BS + emp.TA) - emp.IT;
+}
+
+// Function to get employee data
+void getData(Employee emp[], int n) {
+    for (int i = 0; i < n; i++) {
+        char hasTA;
+        cout << "Enter ID for employee " << i + 1 << ": ";
+        cin >> emp[i].id;
+        cin.ignore(); // Clear newline
+        cout << "Enter Name: ";
+        getline(cin, emp[i].name);
+        cout << "Enter Basic Salary: ";
+        cin >> emp[i].BS;
+        cout << "Does the employee have Transport Allowance (y/n)? ";
+        cin >> hasTA;
+
+        if (hasTA == 'y' || hasTA == 'Y') {
+            cout << "Enter Transport Allowance: ";
+            cin >> emp[i].TA;
+        } else {
+            emp[i].TA = 0;
+        }
+
+        calculate(emp[i]);
+    }
+}
+
+// Function to write to file
+void writeToFile(Employee emp[], int n) {
+    ofstream file("employee.txt");
+    if (file.is_open()) {
+        file << "ID\tName\tBS\tTA\tIT\tNS\n";
+        for (int i = 0; i < n; i++) {
+            file << emp[i].id << "\t"
+                 << emp[i].name << "\t"
+                 << emp[i].BS << "\t"
+                 << emp[i].TA << "\t"
+                 << emp[i].IT << "\t"
+                 << emp[i].NS << "\n";
+        }
+        file.close();
+        cout << "\nData written to employee.txt successfully.\n";
+    } else {
+        cout << "Error opening file.\n";
+    }
+}
+
+// Function to read from file
+void readData() {
+    ifstream file("employee.txt");
+    string line;
+    if (file.is_open()) {
+        cout << "\n--- Employee Records ---\n";
+        while (getline(file, line)) {
+            cout << line << endl;
+        }
+        file.close();
+    } else {
+        cout << "Error reading file.\n";
+    }
+}
+
+int main() {
+    int n;
+    cout << "Enter number of employees: ";
+    cin >> n;
+
+    Employee emp[100];  // Assuming max 100 employees
+    getData(emp, n);
+    writeToFile(emp, n);
+    readData();
+
+    return 0;
+}
